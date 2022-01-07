@@ -1,8 +1,24 @@
 import yfinance as yf
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import MinMaxScaler
+import bs4 as bs
+import requests
+import pandas as pd
 
-sp500 = ["AAPL", "MSFT", "TSLA", "GME", "ETH-USD", "DOGE-USD"]
+sp500_list = ["AAPL", "MSFT", "TSLA", "GME", "ETH-USD", "DOGE-USD"]
+
+
+def get_sp500_stocks():
+    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+    soup = bs.BeautifulSoup(resp.text, 'lxml')
+    table = soup.find('table', {'class': 'wikitable sortable'})
+    industries_dict = {}
+    for row in table.findAll('tr')[1:]:
+        ticker = row.findAll('td')[0].text[:-1]
+        industry = row.findAll('td')[3].text
+        if industry not in industries_dict:
+            industries_dict[industry] = []
+        industries_dict[industry].append(ticker)
+    return industries_dict
 
 
 def load_data(ticker_list):
@@ -15,9 +31,11 @@ def load_data(ticker_list):
     return data
 
 
-def get_closing_info(ticker):
+def get_closing_info(sector, ticker):
+    sp500 = get_sp500_stocks()
+    # sp500 = sp500_list
     closing_info = {}
-    data = load_data(sp500)
+    data = load_data(sp500[sector])
     closing_prices = []
     dates = []
     for i in range(len(data[(ticker, 'Close')])):
@@ -31,7 +49,6 @@ def get_closing_info(ticker):
 
 
 def plot_closing_prices(ticker, closing_prices, dates):
-    print(len(closing_prices))
     plt.title(f'Close Price History of {ticker}', fontsize=18)
     plt.plot(dates, closing_prices)
     plt.xlabel('Date', fontsize=18)
@@ -40,10 +57,13 @@ def plot_closing_prices(ticker, closing_prices, dates):
 
 
 def main():
+    sp500 = get_sp500_stocks()
+    # sp500 = sp500_list
+    sector = input('Enter the sector of the stock you would like to plot.\n')
     ticker = input('Enter a ticker of the stock you would like to plot.\n')
-    load_data(sp500)
-    print(get_closing_info(ticker))
-    plot_closing_prices(ticker, get_closing_info(ticker)['closing prices'], get_closing_info(ticker)['dates'])
+    load_data(sp500[sector])
+    print(get_closing_info(sector, ticker))
+    plot_closing_prices(ticker, get_closing_info(sector, ticker)['closing prices'], get_closing_info(sector, ticker)['dates'])
 
 
 if __name__ == '__main__':
