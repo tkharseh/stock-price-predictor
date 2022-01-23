@@ -2,8 +2,7 @@
 This script is meant to be used to load the data for the project.
 """
 
-from typing import List
-from collections.abc import Iterable
+from typing import List, Iterable
 
 from pandas import DataFrame, read_csv
 import yfinance as yf
