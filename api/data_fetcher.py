@@ -62,10 +62,9 @@ if __name__ == "__main__":
     request = StockDataRequest("10y", "1d")
     request.add_tickers(["MSFT"])
 
-    data = load_stock_data("./data/stock_price_data.csv", up_to_date=True, request=request)
+    data = load_stock_data("../data/stock_price_data.csv",
+                           up_to_date=True, request=request)
     print(data.head(5))
 
-    data = load_stock_data("./data/stock_price_data.csv")
+    data = load_stock_data("../data/stock_price_data.csv")
     print(data.head(5))
-
-
